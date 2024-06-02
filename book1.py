@@ -1,16 +1,13 @@
 from euclid import *
 
-# TODO (Euclid): Instrument simulation
 # TODO (Euclid): Accompanying text
 # TODO (Euclid): Common notions and definitions
+# TODO: (Euclid): Translation effect
+# TODO: (Euclid): Text stack
 # TODO (Book I): Proofs
-# TODO: Translation effect
 
 class Proposition1(EuclidScene):
     def construct(self):
-        """
-        
-        """
         title = Tex("Proposition I.")
         description = Tex("On a given finite straight line,\n\n to describe an equilateral triangle.")
 
@@ -30,9 +27,9 @@ class Proposition1(EuclidScene):
         self.given(Line(A, B))
 
         # Inscribe blue circle with radius white line (post 3)
-        circleBlue = self.postulate3(A, B, BLUE)
+        circleBlue = self.postulate3(A, B, BLUE, WHITE)
         # Inscribe red circle with radius white line (post 3)
-        circleRed = self.postulate3(B, A, RED)
+        circleRed = self.postulate3(B, A, RED, WHITE)
 
         C = intersect(circleBlue, circleRed)[1]
 

@@ -3,6 +3,7 @@ from typing import Tuple, List
 from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 
 # TODO: Consistent casing
+# TODO: -> None, for procedures
 
 def objectEquation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     """
@@ -150,7 +151,6 @@ class EuclidScene(Scene):
         
         self.addObject(line)
 
-        # TODO: Simulate straight-edge
         self.play(Create(line), run_time=1.5)
 
         return line
@@ -179,13 +179,12 @@ class EuclidScene(Scene):
         newLine.color = color
         newLine.set_opacity(0.5)
 
-        # TODO: Simulate straight-edge
         self.play(Create(newLine), run_time=2)
 
         return newLine
 
 
-    def postulate3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR) -> Circle:
+    def postulate3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = PROCESS_COLOR) -> Circle:
         """
         Postulate III
         ---
@@ -194,13 +193,29 @@ class EuclidScene(Scene):
         
         self.validatePoints(center, radius)
 
-        circle = Circle(np.linalg.norm(radius - center), color)
+        numRadius = np.linalg.norm(radius - center)
+        circle = Circle(numRadius, color)
         circle.move_to(center)
 
         self.addObject(circle)
         
-        # TODO: Simulate compass
-        self.play(Create(circle), run_time=2)
+        arc = Arc(numRadius, angle_between_vectors(RIGHT, radius-center), 2*PI, color=color)
+        arc.move_to(center)
+
+        radiusLine = Line(center, radius)
+        radiusLine.color = radiusColor
+        
+        self.play(Create(radiusLine))
+
+        def update_radiusLine(ob: Line):
+            ob.put_start_and_end_on(center, arc.get_end())
+        
+        radiusLine.add_updater(update_radiusLine)
+
+        self.play(Create(arc), run_time=2)
+        self.add(circle)
+        self.remove(arc)
+        self.play(FadeOut(radiusLine))
 
         return circle
 
