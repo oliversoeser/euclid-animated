@@ -81,6 +81,20 @@ class EuclidScene(Scene):
     points = []
     steps = []
 
+    def construct(self, title_text: str, description_text: str) -> None:
+        title = Tex(title_text)
+        description = Tex(description_text)
+
+        title.align_on_border(UP)
+        description.next_to(title, DOWN, buff=2)
+
+        self.play(Write(title))
+        self.play(Write(description), run_time=2)
+
+        self.wait(2.5)
+
+        self.play(FadeOut(description))
+
     def add_object(self, ob: Mobject) -> None:
         """
         Add Object
