@@ -11,18 +11,15 @@ def object_equation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     The equation describing a Mobject.
     """
 
+    # TODO: Clearner equations
     if type(ob) == Line:
         [x1, y1], [x2, y2] = ob.get_start()[:2], ob.get_end()[:2]
-
         dx, dy = x2 - x1, y2 - y1
-        m = dy/dx
 
-        return ( m * (x - x1) + y1 - y )
+        return ( (dy/dx) * (x - x1) + y1 - y )
     elif type(ob) == Circle:
-        a, b = ob.get_center()[:2]
-        r = ob.radius
-
-        return ((x-a)**2+(y-b)**2-r**2)
+        x1, y1 = ob.get_center()[:2]
+        return ( (x - x1)**2 + (y - y1)**2 - (ob.radius)**2 )
     else:
         return None
 
@@ -33,17 +30,15 @@ def object_domain(ob: Mobject) -> Set:
     The domain of the x value of the equation of a Mobject.
     """
 
+    # TODO: Cleaner intervals
     if type(ob) == Line:
         start, end = ob.get_start()[0], ob.get_end()[0]
-
         if start < end:
             return Interval(start, end)
         else:
             return Interval(end, start)
     elif type(ob) == Circle:
-        center = ob.get_center()[0]
-        radius = ob.radius
-
+        center, radius = ob.get_center()[0], ob.radius
         return Interval(center-radius, center+radius)
     else:
         return EmptySet
@@ -60,7 +55,7 @@ def intersect(obA: Mobject, obB: Mobject) -> List[np.ndarray]:
 
     for solution in solutions:
         # TODO: Check domain
-        # TODO: Proper validity check
+        # TODO: Proper and cleaner validity check
         valid = True
         for i in solution:
             if type(i) == Symbol:
@@ -92,7 +87,6 @@ class EuclidScene(Scene):
         self.play(Write(description), run_time=2)
 
         self.wait(2.5)
-
         self.play(FadeOut(description))
 
     def add_object(self, ob: Mobject) -> None:
@@ -102,14 +96,11 @@ class EuclidScene(Scene):
         Adds an object to the object list and updates the list of accesible points accordingly.
         """
 
-        # Objects
         self.objects.append(ob)
 
-        # Endpoints
         if type(ob) == Line:
             self.points.extend(ob.get_start_and_end())
 
-        # Intersection points
         for iterOb in self.objects:
             self.points.extend(intersect(ob, iterOb))
 
@@ -121,6 +112,7 @@ class EuclidScene(Scene):
         """
 
         for point in points:
+            # TODO: Cleaner validity check
             valid = False
             for p in self.points:
                 if np.array_equal(np.array(p), point):
@@ -139,7 +131,6 @@ class EuclidScene(Scene):
         for ob in objects:
             ob.color = FOREGROUND_COLOR
             self.play(Create(ob))
-            
             self.add_object(ob)
 
     def add_step(self, text: str) -> Animation:
@@ -161,11 +152,9 @@ class EuclidScene(Scene):
 
         self.validate_points(start, end)
 
-        line = Line(start, end)
-        line.color = color
+        line = Line(start, end, color=color)
         
         self.add_object(line)
-
         self.play(Create(line, run_time=1.5), self.add_step("Post. 1"))
 
         return line
@@ -180,52 +169,40 @@ class EuclidScene(Scene):
         (start, end) = line
         self.validate_points(start, end)
 
+        # TODO: Cleaner way of finding the point
         [x1, y1], [x2, y2] = start[:2], end[:2]
         dx, dy = x2 - x1, y2 - y1
 
         x = 15 * np.sign(x2 - x1)
         y = (dy/dx) * (x - x1) + y1
 
-        new_line = Line(end, [x, y, 0])
-        new_line.color = color
-        new_line.set_opacity(0.5)
+        new_line = Line(end, [x, y, 0], color=color).set_opacity(0.5)
 
         self.play(Create(new_line, run_time=1.5), self.add_step("Post. 2"))
 
         return new_line
 
 
-    def postulate_3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = FOREGROUND_COLOR) -> Circle:
+    def postulate_3(self, center: np.ndarray, radius_point: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = FOREGROUND_COLOR) -> Circle:
         """
         Postulate III
         ---
         Let it be granted that a circle may be described with any centre at any distance from that centre.
         """
         
-        self.validate_points(center, radius)
+        self.validate_points(center, radius_point)
 
-        num_radius = np.linalg.norm(radius - center)
-        circle = Circle(num_radius, color)
-        circle.move_to(center)
+        radius = np.linalg.norm(radius_point - center)
+        circle = Circle(radius, color).move_to(center)
+        arc = Arc(radius, angle_between_vectors(RIGHT, radius_point-center), 2*PI, color=color).move_to(center)
 
-        self.add_object(circle)
-        
-        arc = Arc(num_radius, angle_between_vectors(RIGHT, radius-center), 2*PI, color=color)
-        arc.move_to(center)
+        radius_line = Line(center, radius_point, color=radiusColor).add_updater(lambda ob : ob.put_start_and_end_on(center, arc.get_end()))
 
-        radius_line = Line(center, radius)
-        radius_line.color = radiusColor
-        
         self.play(Create(radius_line))
-
-        def update_radiusLine(ob: Line):
-            ob.put_start_and_end_on(center, arc.get_end())
-        
-        radius_line.add_updater(update_radiusLine)
-
         self.play(Create(arc, run_time=2), self.add_step("Post. 3"))
+
         self.add(circle)
-        self.remove(arc)
-        self.remove(radius_line)
+        self.add_object(circle)
+        self.remove(arc, radius_line)
 
         return circle
