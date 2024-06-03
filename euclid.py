@@ -79,6 +79,7 @@ class EuclidScene(Scene):
 
     objects = []
     points = []
+    steps = []
 
     def add_object(self, ob: Mobject) -> None:
         """
@@ -127,22 +128,6 @@ class EuclidScene(Scene):
             
             self.add_object(ob)
 
-class PropositionScene(EuclidScene):
-    """
-    Proposition Scene
-    ---
-    Scene demonstrating one of Euclid's Propositions
-    """
-    
-    """
-    Set title and description
-    Write title and description
-    Fade out description
-    Show given
-    """
-
-    steps = []
-
     def add_step(self, text: str) -> Animation:
         step = Tex(text)
         if len(self.steps) == 0:
@@ -179,17 +164,13 @@ class PropositionScene(EuclidScene):
         """
 
         (start, end) = line
-
         self.validate_points(start, end)
 
         [x1, y1], [x2, y2] = start[:2], end[:2]
-
         dx, dy = x2 - x1, y2 - y1
 
-        m = dy/dx
-
         x = 15 * np.sign(x2 - x1)
-        y = m * (x - x1) + y1
+        y = (dy/dx) * (x - x1) + y1
 
         new_line = Line(end, [x, y, 0])
         new_line.color = color

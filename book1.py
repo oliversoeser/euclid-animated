@@ -1,6 +1,6 @@
 from euclid import *
 
-class Proposition1(PropositionScene):
+class Proposition1(EuclidScene):
     def construct(self) -> None:
         title = Tex("Proposition I.")
         description = Tex("On a given finite straight line,\n\n to describe an equilateral triangle.")
