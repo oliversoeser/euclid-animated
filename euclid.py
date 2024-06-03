@@ -2,6 +2,8 @@ from manim import *
 from typing import Tuple, List
 from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 
+FOREGROUND_COLOR = WHITE
+
 def object_equation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     """
     Object Equation
@@ -78,23 +80,6 @@ class EuclidScene(Scene):
     objects = []
     points = []
 
-    steps = Group()
-
-    FOREGROUND_COLOR = WHITE
-    PROCESS_COLOR = GREEN
-
-    def set_foreground_color(self, color: ManimColor) -> None:
-        self.FOREGROUND_COLOR = color
-
-    def set_process_color(self, color: ManimColor) -> None:
-        self.PROCESS_COLOR = color
-
-    def add_step(self, step: str) -> None:
-        step_text = Tex(step)
-        self.steps.add(step_text)
-        self.steps.arrange(DOWN)
-        self.steps.align_on_border(UL)
-
     def add_object(self, ob: Mobject) -> None:
         """
         Add Object
@@ -137,11 +122,37 @@ class EuclidScene(Scene):
         """
 
         for ob in objects:
-            ob.color = self.FOREGROUND_COLOR
+            ob.color = FOREGROUND_COLOR
             self.play(Create(ob))
             
             self.add_object(ob)
 
+class PropositionScene(EuclidScene):
+    """
+    Proposition Scene
+    ---
+    Scene demonstrating one of Euclid's Propositions
+    """
+    
+    """
+    Set title and description
+    Write title and description
+    Fade out description
+    Show given
+    """
+
+    steps = []
+
+    def add_step(self, text: str) -> Animation:
+        step = Tex(text)
+        if len(self.steps) == 0:
+            step.align_on_border(UL, buff=1.5)
+        else:
+            step.next_to(self.steps[-1], DOWN)
+        self.steps.append(step)
+
+        return Write(step, run_time=0.75)
+    
     def postulate_1(self, start: np.ndarray, end: np.ndarray, color: ManimColor = FOREGROUND_COLOR) -> Line:
         """
         Postulate I
@@ -156,9 +167,7 @@ class EuclidScene(Scene):
         
         self.add_object(line)
 
-        self.add_step("Post. 1")
-
-        self.play(Create(line), run_time=1.5)
+        self.play(Create(line, run_time=1.5), self.add_step("Post. 1"))
 
         return line
     
@@ -186,14 +195,12 @@ class EuclidScene(Scene):
         new_line.color = color
         new_line.set_opacity(0.5)
 
-        self.add_step("Post. 2")
-
-        self.play(Create(new_line), run_time=2)
+        self.play(Create(new_line, run_time=1.5), self.add_step("Post. 2"))
 
         return new_line
 
 
-    def postulate_3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = PROCESS_COLOR) -> Circle:
+    def postulate_3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = FOREGROUND_COLOR) -> Circle:
         """
         Postulate III
         ---
@@ -221,25 +228,9 @@ class EuclidScene(Scene):
         
         radius_line.add_updater(update_radiusLine)
 
-        self.add_step("Post. 3")
-
-        self.play(Create(arc), run_time=2)
+        self.play(Create(arc, run_time=2), self.add_step("Post. 3"))
         self.add(circle)
         self.remove(arc)
-        self.play(FadeOut(radius_line))
+        self.remove(radius_line)
 
         return circle
-
-class PropositionScene(EuclidScene):
-    """
-    Proposition Scene
-    ---
-    Scene demonstrating one of Euclid's Propositions
-    """
-    
-    """
-    Set title and description
-    Write title and description
-    Fade out description
-    Show given
-    """
