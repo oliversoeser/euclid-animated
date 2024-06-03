@@ -111,15 +111,8 @@ class EuclidScene(Scene):
         Checks if the points are accessible within Euclid's restrictions. Raises an exception if not.
         """
 
-        for point in points:
-            # TODO: Cleaner validity check
-            valid = False
-            for p in self.points:
-                if np.array_equal(np.array(p), point):
-                    valid = True
-                    break
-            if not valid:
-                raise
+        if np.any([np.all([(not np.array_equal(np.array(p), point)) for p in self.points]) for point in points]):
+            raise
 
     def given(self, *objects: Mobject) -> None:
         """
