@@ -23,11 +23,11 @@ class Proposition1(EuclidScene):
         self.given(Line(A, B))
 
         # Inscribe blue circle with radius white line (post 3)
-        circleBlue = self.postulate_3(A, B, BLUE, WHITE)
+        circle_blue = self.postulate_3(A, B, BLUE, WHITE)
         # Inscribe red circle with radius white line (post 3)
-        circleRed = self.postulate_3(B, A, RED, WHITE)
+        circle_red = self.postulate_3(B, A, RED, WHITE)
 
-        C = intersect(circleBlue, circleRed)[1]
+        C = intersect(circle_blue, circle_red)[1]
 
         # Draw yellow line (post 1)
         self.postulate_1(A, C, YELLOW)

@@ -49,12 +49,12 @@ def object_domain(ob: Mobject) -> Set:
 def intersect(obA: Mobject, obB: Mobject) -> List[np.ndarray]:
     x, y = symbols("x, y", real=True)
 
-    eqA = object_equation(obA, x, y)
-    eqB = object_equation(obB, x, y)
+    eq_a = object_equation(obA, x, y)
+    eq_b = object_equation(obB, x, y)
 
-    solutions = nonlinsolve([eqA, eqB], [x, y])
+    solutions = nonlinsolve([eq_a, eq_b], [x, y])
 
-    intersectionPoints = []
+    intersection_points = []
 
     for solution in solutions:
         # TODO: Check domain
@@ -64,9 +64,9 @@ def intersect(obA: Mobject, obB: Mobject) -> List[np.ndarray]:
             if type(i) == Symbol:
                 valid = False
         if valid:
-            intersectionPoints.append([float(N(i)) for i in solution] + [0])
+            intersection_points.append([float(N(i)) for i in solution] + [0])
 
-    return intersectionPoints
+    return intersection_points
 
 class EuclidScene(Scene):
     """
@@ -90,8 +90,8 @@ class EuclidScene(Scene):
         self.PROCESS_COLOR = color
 
     def add_step(self, step: str) -> None:
-        stepText = Tex(step)
-        self.steps.add(stepText)
+        step_text = Tex(step)
+        self.steps.add(step_text)
         self.steps.arrange(DOWN)
         self.steps.align_on_border(UL)
 
@@ -182,15 +182,15 @@ class EuclidScene(Scene):
         x = 15 * np.sign(x2 - x1)
         y = m * (x - x1) + y1
 
-        newLine = Line(end, [x, y, 0])
-        newLine.color = color
-        newLine.set_opacity(0.5)
+        new_line = Line(end, [x, y, 0])
+        new_line.color = color
+        new_line.set_opacity(0.5)
 
         self.add_step("Post. 2")
 
-        self.play(Create(newLine), run_time=2)
+        self.play(Create(new_line), run_time=2)
 
-        return newLine
+        return new_line
 
 
     def postulate_3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = PROCESS_COLOR) -> Circle:
@@ -202,31 +202,31 @@ class EuclidScene(Scene):
         
         self.validate_points(center, radius)
 
-        numRadius = np.linalg.norm(radius - center)
-        circle = Circle(numRadius, color)
+        num_radius = np.linalg.norm(radius - center)
+        circle = Circle(num_radius, color)
         circle.move_to(center)
 
         self.add_object(circle)
         
-        arc = Arc(numRadius, angle_between_vectors(RIGHT, radius-center), 2*PI, color=color)
+        arc = Arc(num_radius, angle_between_vectors(RIGHT, radius-center), 2*PI, color=color)
         arc.move_to(center)
 
-        radiusLine = Line(center, radius)
-        radiusLine.color = radiusColor
+        radius_line = Line(center, radius)
+        radius_line.color = radiusColor
         
-        self.play(Create(radiusLine))
+        self.play(Create(radius_line))
 
         def update_radiusLine(ob: Line):
             ob.put_start_and_end_on(center, arc.get_end())
         
-        radiusLine.add_updater(update_radiusLine)
+        radius_line.add_updater(update_radiusLine)
 
         self.add_step("Post. 3")
 
         self.play(Create(arc), run_time=2)
         self.add(circle)
         self.remove(arc)
-        self.play(FadeOut(radiusLine))
+        self.play(FadeOut(radius_line))
 
         return circle
 
