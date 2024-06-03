@@ -3,7 +3,6 @@ from typing import Tuple, List
 from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 
 # TODO: Consistent casing
-# TODO: -> None, for procedures
 
 def objectEquation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     """
@@ -81,16 +80,24 @@ class EuclidScene(Scene):
     objects = []
     points = []
 
+    steps = Group()
+
     FOREGROUND_COLOR = WHITE
     PROCESS_COLOR = GREEN
 
-    def setForegroundColor(self, color: ManimColor):
+    def setForegroundColor(self, color: ManimColor) -> None:
         self.FOREGROUND_COLOR = color
 
-    def setProcessColor(self, color: ManimColor):
+    def setProcessColor(self, color: ManimColor) -> None:
         self.PROCESS_COLOR = color
 
-    def addObject(self, ob):
+    def addStep(self, step: str) -> None:
+        stepText = Tex(step)
+        self.steps.add(stepText)
+        self.steps.arrange(DOWN)
+        self.steps.align_on_border(UL)
+
+    def addObject(self, ob: Mobject) -> None:
         """
         Add Object
         ---
@@ -108,7 +115,7 @@ class EuclidScene(Scene):
         for iterOb in self.objects:
             self.points.extend(intersect(ob, iterOb))
 
-    def validatePoints(self, *points: np.ndarray): 
+    def validatePoints(self, *points: np.ndarray) -> None:
         """
         Validate Points
         ---
@@ -124,7 +131,7 @@ class EuclidScene(Scene):
             if not valid:
                 raise
 
-    def given(self, *objects: Mobject):
+    def given(self, *objects: Mobject) -> None:
         """
         Given Objects
         ---
@@ -150,6 +157,8 @@ class EuclidScene(Scene):
         line.color = color
         
         self.addObject(line)
+
+        self.addStep("Post. 1")
 
         self.play(Create(line), run_time=1.5)
 
@@ -178,6 +187,8 @@ class EuclidScene(Scene):
         newLine = Line(end, [x, y, 0])
         newLine.color = color
         newLine.set_opacity(0.5)
+
+        self.addStep("Post. 2")
 
         self.play(Create(newLine), run_time=2)
 
@@ -211,6 +222,8 @@ class EuclidScene(Scene):
             ob.put_start_and_end_on(center, arc.get_end())
         
         radiusLine.add_updater(update_radiusLine)
+
+        self.addStep("Post. 3")
 
         self.play(Create(arc), run_time=2)
         self.add(circle)

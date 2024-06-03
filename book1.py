@@ -1,13 +1,11 @@
 from euclid import *
 
-# TODO (Euclid): Accompanying text
-# TODO (Euclid): Common notions and definitions
-# TODO: (Euclid): Translation effect
-# TODO: (Euclid): Text stack
-# TODO (Book I): Proofs
+# TODO (Euclid): Accompanying text stack including common notions and definitions
 
 class Proposition1(EuclidScene):
-    def construct(self):
+    def construct(self) -> None:
+        self.add(self.steps)
+
         title = Tex("Proposition I.")
         description = Tex("On a given finite straight line,\n\n to describe an equilateral triangle.")
 
