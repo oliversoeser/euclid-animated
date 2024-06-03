@@ -2,9 +2,7 @@ from manim import *
 from typing import Tuple, List
 from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 
-# TODO: Consistent casing
-
-def objectEquation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
+def object_equation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     """
     Object Equation
     ---
@@ -26,7 +24,7 @@ def objectEquation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     else:
         return None
 
-def objectDomain(ob: Mobject) -> Set:
+def object_domain(ob: Mobject) -> Set:
     """
     Object Domain
     ---
@@ -51,8 +49,8 @@ def objectDomain(ob: Mobject) -> Set:
 def intersect(obA: Mobject, obB: Mobject) -> List[np.ndarray]:
     x, y = symbols("x, y", real=True)
 
-    eqA = objectEquation(obA, x, y)
-    eqB = objectEquation(obB, x, y)
+    eqA = object_equation(obA, x, y)
+    eqB = object_equation(obB, x, y)
 
     solutions = nonlinsolve([eqA, eqB], [x, y])
 
@@ -85,19 +83,19 @@ class EuclidScene(Scene):
     FOREGROUND_COLOR = WHITE
     PROCESS_COLOR = GREEN
 
-    def setForegroundColor(self, color: ManimColor) -> None:
+    def set_foreground_color(self, color: ManimColor) -> None:
         self.FOREGROUND_COLOR = color
 
-    def setProcessColor(self, color: ManimColor) -> None:
+    def set_process_color(self, color: ManimColor) -> None:
         self.PROCESS_COLOR = color
 
-    def addStep(self, step: str) -> None:
+    def add_step(self, step: str) -> None:
         stepText = Tex(step)
         self.steps.add(stepText)
         self.steps.arrange(DOWN)
         self.steps.align_on_border(UL)
 
-    def addObject(self, ob: Mobject) -> None:
+    def add_object(self, ob: Mobject) -> None:
         """
         Add Object
         ---
@@ -115,7 +113,7 @@ class EuclidScene(Scene):
         for iterOb in self.objects:
             self.points.extend(intersect(ob, iterOb))
 
-    def validatePoints(self, *points: np.ndarray) -> None:
+    def validate_points(self, *points: np.ndarray) -> None:
         """
         Validate Points
         ---
@@ -142,29 +140,29 @@ class EuclidScene(Scene):
             ob.color = self.FOREGROUND_COLOR
             self.play(Create(ob))
             
-            self.addObject(ob)
+            self.add_object(ob)
 
-    def postulate1(self, start: np.ndarray, end: np.ndarray, color: ManimColor = FOREGROUND_COLOR) -> Line:
+    def postulate_1(self, start: np.ndarray, end: np.ndarray, color: ManimColor = FOREGROUND_COLOR) -> Line:
         """
         Postulate I
         ---
         Let it be granted that a straight line may be drawn from any one point to any other point.
         """
 
-        self.validatePoints(start, end)
+        self.validate_points(start, end)
 
         line = Line(start, end)
         line.color = color
         
-        self.addObject(line)
+        self.add_object(line)
 
-        self.addStep("Post. 1")
+        self.add_step("Post. 1")
 
         self.play(Create(line), run_time=1.5)
 
         return line
     
-    def postulate2(self, line: Tuple[np.ndarray, np.ndarray], color: ManimColor = FOREGROUND_COLOR) -> Line:
+    def postulate_2(self, line: Tuple[np.ndarray, np.ndarray], color: ManimColor = FOREGROUND_COLOR) -> Line:
         """
         Postulate II
         ---
@@ -173,7 +171,7 @@ class EuclidScene(Scene):
 
         (start, end) = line
 
-        self.validatePoints(start, end)
+        self.validate_points(start, end)
 
         [x1, y1], [x2, y2] = start[:2], end[:2]
 
@@ -188,27 +186,27 @@ class EuclidScene(Scene):
         newLine.color = color
         newLine.set_opacity(0.5)
 
-        self.addStep("Post. 2")
+        self.add_step("Post. 2")
 
         self.play(Create(newLine), run_time=2)
 
         return newLine
 
 
-    def postulate3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = PROCESS_COLOR) -> Circle:
+    def postulate_3(self, center: np.ndarray, radius: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = PROCESS_COLOR) -> Circle:
         """
         Postulate III
         ---
         Let it be granted that a circle may be described with any centre at any distance from that centre.
         """
         
-        self.validatePoints(center, radius)
+        self.validate_points(center, radius)
 
         numRadius = np.linalg.norm(radius - center)
         circle = Circle(numRadius, color)
         circle.move_to(center)
 
-        self.addObject(circle)
+        self.add_object(circle)
         
         arc = Arc(numRadius, angle_between_vectors(RIGHT, radius-center), 2*PI, color=color)
         arc.move_to(center)
@@ -223,7 +221,7 @@ class EuclidScene(Scene):
         
         radiusLine.add_updater(update_radiusLine)
 
-        self.addStep("Post. 3")
+        self.add_step("Post. 3")
 
         self.play(Create(arc), run_time=2)
         self.add(circle)
