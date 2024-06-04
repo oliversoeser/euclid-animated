@@ -4,6 +4,16 @@ from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 
 FOREGROUND_COLOR = WHITE
 
+def dot_equations(point: np.ndarray, x: Symbol, y: Symbol) -> List[Expr]:
+    """
+    Dot equations
+    ---
+    Equations describing a point in 2D space.
+    """
+    [a, b] = point
+    return [x-a, y-b]
+
+
 def line_equation(start: np.ndarray, end: np.ndarray, x: Symbol, y: Symbol) -> Expr:
     """
     Line equation
@@ -22,17 +32,19 @@ def circle_equation(center: np.ndarray, radius: float, x: Symbol, y: Symbol) -> 
     a, b = center
     return ((x - a)**2 + (y - b)**2 - (radius)**2)
 
-def object_equation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
+def object_equation(ob: Mobject, x: Symbol, y: Symbol) -> List[Expr]:
     """
     Object Equation
     ---
     The equation describing a Mobject.
     """
 
-    if type(ob) == Line:
-        return line_equation(ob.get_start()[:2], ob.get_end()[:2], x, y)
+    if type(ob) == Dot:
+        return dot_equations(ob.get_center()[:2], x, y)
+    elif type(ob) == Line:
+        return [line_equation(ob.get_start()[:2], ob.get_end()[:2], x, y)]
     elif type(ob) == Circle:
-        return circle_equation(ob.get_center()[:2], ob.radius, x, y)
+        return [circle_equation(ob.get_center()[:2], ob.radius, x, y)]
     else:
         return None
 
@@ -67,7 +79,7 @@ def intersect(ob_a: Mobject, ob_b: Mobject) -> List[np.ndarray]:
     eq_a = object_equation(ob_a, x, y)
     eq_b = object_equation(ob_b, x, y)
 
-    solutions = nonlinsolve([eq_a, eq_b], [x, y])
+    solutions = nonlinsolve(eq_a + eq_b, [x, y])
 
     intersection_points = []
 
@@ -121,7 +133,9 @@ class EuclidScene(Scene):
 
         self.objects.append(ob)
 
-        if type(ob) == Line:
+        if type(ob) == Dot:
+            self.points.append(ob.get_center())
+        elif type(ob) == Line:
             self.points.extend(ob.get_start_and_end())
 
         for iterOb in self.objects:

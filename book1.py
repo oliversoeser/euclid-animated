@@ -15,3 +15,12 @@ class Proposition1(EuclidScene):
         self.postulate_1(B, C, RED)
 
         self.wait()
+
+class Proposition2(EuclidScene):
+    def construct(self) -> None:
+        super().construct("Proposition II.", "From a given point, to draw a straight line\n\n equal to a given finite straight line.")
+
+        A, B, P = [-2, 0, 0], [0, -1, 0], [1, 0.5, 0]
+
+        self.given(Line(A, B), Dot(P))
+        self.wait()
