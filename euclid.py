@@ -4,6 +4,14 @@ from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 
 FOREGROUND_COLOR = WHITE
 
+def line_equation(start: np.ndarray, end: np.ndarray, x: Symbol, y: Symbol) -> Expr:
+    [x_1, y_1], [x_2, y_2] = start, end
+    return (((x_2 - x_1)/(y_2 - y_1)) * (x - x_1) + y_1 - y)
+
+def circle_equation(center: np.ndarray, radius: np.ndarray, x: Symbol, y: Symbol) -> Expr:
+    a, b = center
+    return ((x - a)**2 + (y - b)**2 - (radius)**2)
+
 def object_equation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     """
     Object Equation
@@ -11,15 +19,10 @@ def object_equation(ob: Mobject, x: Symbol, y: Symbol) -> Expr:
     The equation describing a Mobject.
     """
 
-    # TODO: Clearner equations
     if type(ob) == Line:
-        [x1, y1], [x2, y2] = ob.get_start()[:2], ob.get_end()[:2]
-        dx, dy = x2 - x1, y2 - y1
-
-        return ( (dy/dx) * (x - x1) + y1 - y )
+        return line_equation(ob.get_start()[:2], ob.get_end()[:2], x, y)
     elif type(ob) == Circle:
-        x1, y1 = ob.get_center()[:2]
-        return ( (x - x1)**2 + (y - y1)**2 - (ob.radius)**2 )
+        return circle_equation(ob.get_center()[:2], ob.radius, x, y)
     else:
         return None
 
@@ -30,7 +33,6 @@ def object_domain(ob: Mobject) -> Set:
     The domain of the x value of the equation of a Mobject.
     """
 
-    # TODO: Cleaner intervals
     if type(ob) == Line:
         start, end = ob.get_start()[0], ob.get_end()[0]
         if start < end:
@@ -38,30 +40,29 @@ def object_domain(ob: Mobject) -> Set:
         else:
             return Interval(end, start)
     elif type(ob) == Circle:
-        center, radius = ob.get_center()[0], ob.radius
-        return Interval(center-radius, center+radius)
+        center = ob.get_center()[0]
+        return Interval(center-ob.radius, center+ob.radius)
     else:
         return EmptySet
 
-def intersect(obA: Mobject, obB: Mobject) -> List[np.ndarray]:
+def intersect(ob_a: Mobject, ob_b: Mobject) -> List[np.ndarray]:
     x, y = symbols("x, y", real=True)
 
-    eq_a = object_equation(obA, x, y)
-    eq_b = object_equation(obB, x, y)
+    eq_a = object_equation(ob_a, x, y)
+    eq_b = object_equation(ob_b, x, y)
 
     solutions = nonlinsolve([eq_a, eq_b], [x, y])
 
     intersection_points = []
 
     for solution in solutions:
-        # TODO: Check domain
-        # TODO: Proper and cleaner validity check
-        valid = True
-        for i in solution:
-            if type(i) == Symbol:
-                valid = False
-        if valid:
-            intersection_points.append([float(N(i)) for i in solution] + [0])
+        domain = object_domain(ob_a).intersect(object_domain(ob_b))
+
+        if domain.contains(solution[0]):
+            try:
+                intersection_points.append([float(N(i)) for i in solution] + [0])
+            except:
+                print("DEBUG: Invalid solution", solution)
 
     return intersection_points
 
@@ -162,12 +163,9 @@ class EuclidScene(Scene):
         (start, end) = line
         self.validate_points(start, end)
 
-        # TODO: Cleaner way of finding the point
-        [x1, y1], [x2, y2] = start[:2], end[:2]
-        dx, dy = x2 - x1, y2 - y1
-
-        x = 15 * np.sign(x2 - x1)
-        y = (dy/dx) * (x - x1) + y1
+        [x_1, y_1], [x_2, y_2] = start[:2], end[:2]
+        x = 15 * np.sign(x_2 - x_1)
+        y = ((y_2 - y_1)/(x_2 - x_1)) * (x - x_1) + y_1
 
         new_line = Line(end, [x, y, 0], color=color).set_opacity(0.5)
 
@@ -176,7 +174,7 @@ class EuclidScene(Scene):
         return new_line
 
 
-    def postulate_3(self, center: np.ndarray, radius_point: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radiusColor: ManimColor = FOREGROUND_COLOR) -> Circle:
+    def postulate_3(self, center: np.ndarray, radius_point: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radius_color: ManimColor = FOREGROUND_COLOR) -> Circle:
         """
         Postulate III
         ---
@@ -189,7 +187,7 @@ class EuclidScene(Scene):
         circle = Circle(radius, color).move_to(center)
         arc = Arc(radius, angle_between_vectors(RIGHT, radius_point-center), 2*PI, color=color).move_to(center)
 
-        radius_line = Line(center, radius_point, color=radiusColor).add_updater(lambda ob : ob.put_start_and_end_on(center, arc.get_end()))
+        radius_line = Line(center, radius_point, color=radius_color).add_updater(lambda ob : ob.put_start_and_end_on(center, arc.get_end()))
 
         self.play(Create(radius_line))
         self.play(Create(arc, run_time=2), self.add_step("Post. 3"))
