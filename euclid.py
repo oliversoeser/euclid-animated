@@ -5,10 +5,20 @@ from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 FOREGROUND_COLOR = WHITE
 
 def line_equation(start: np.ndarray, end: np.ndarray, x: Symbol, y: Symbol) -> Expr:
+    """
+    Line equation
+    ---
+    Equation of a line with two given points.
+    """
     [x_1, y_1], [x_2, y_2] = start, end
     return (((x_2 - x_1)/(y_2 - y_1)) * (x - x_1) + y_1 - y)
 
-def circle_equation(center: np.ndarray, radius: np.ndarray, x: Symbol, y: Symbol) -> Expr:
+def circle_equation(center: np.ndarray, radius: float, x: Symbol, y: Symbol) -> Expr:
+    """
+    Circle equation
+    ---
+    Equation of a circle with the centre and radius given.
+    """
     a, b = center
     return ((x - a)**2 + (y - b)**2 - (radius)**2)
 
@@ -46,6 +56,12 @@ def object_domain(ob: Mobject) -> Set:
         return EmptySet
 
 def intersect(ob_a: Mobject, ob_b: Mobject) -> List[np.ndarray]:
+    """
+    Intersection
+    ---
+    Returns list of intersection points of two Mobjects.
+    """
+
     x, y = symbols("x, y", real=True)
 
     eq_a = object_equation(ob_a, x, y)
@@ -78,6 +94,12 @@ class EuclidScene(Scene):
     steps = []
 
     def construct(self, title_text: str, description_text: str) -> None:
+        """
+        Constructor
+        ---
+        Initiates the scene with a title and description.
+        """
+
         title = Tex(title_text)
         description = Tex(description_text)
 
@@ -128,6 +150,11 @@ class EuclidScene(Scene):
             self.add_object(ob)
 
     def add_step(self, text: str) -> Animation:
+        """
+        Add Step
+        ---
+        Adds another step to the on-screen list.
+        """
         step = Tex(text)
         if len(self.steps) == 0:
             step.align_on_border(UL, buff=1.5)
@@ -164,7 +191,7 @@ class EuclidScene(Scene):
         self.validate_points(start, end)
 
         [x_1, y_1], [x_2, y_2] = start[:2], end[:2]
-        x = 15 * np.sign(x_2 - x_1)
+        x = RIGHT[0] * np.sign(x_2 - x_1)
         y = ((y_2 - y_1)/(x_2 - x_1)) * (x - x_1) + y_1
 
         new_line = Line(end, [x, y, 0], color=color).set_opacity(0.5)
@@ -172,7 +199,6 @@ class EuclidScene(Scene):
         self.play(Create(new_line, run_time=1.5), self.add_step("Post. 2"))
 
         return new_line
-
 
     def postulate_3(self, center: np.ndarray, radius_point: np.ndarray, color: ManimColor = FOREGROUND_COLOR, radius_color: ManimColor = FOREGROUND_COLOR) -> Circle:
         """
