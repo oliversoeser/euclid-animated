@@ -1,4 +1,5 @@
-from euclid import *
+from manim import *
+from manim_euclid import *
 
 class Proposition1(EuclidScene):
     def construct(self) -> None:

@@ -1,4 +1,5 @@
-from manim import *
+from manim import Scene, WHITE, Mobject, Dot, Circle, Line, Tex, Write, UP, DOWN, FadeOut, Create, Animation, ManimColor, Arc, UL, RIGHT, angle_between_vectors, PI
+import numpy as np
 from typing import Tuple, List
 from sympy import symbols, nonlinsolve, Symbol, Expr, Interval, Set, EmptySet, N
 
