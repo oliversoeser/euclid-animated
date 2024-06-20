@@ -1,2 +1,2 @@
-# euclid-animated
+# manim-euclid
 Euclid's Elements animated using Manim
